@@ -44,14 +44,15 @@ export const getOneFoods = (req, res) => {
 }
 
 export const deleteFoods = (req, res) => {
-  foods.findByIdAndDelete(req.params.id).then(result => {
-    // const file = path.join(__dirname + '/../' + result.data.poster)
-    // fs.unlink(file, res => console.log('success', res))
-    console.log(path.join(result.data.poster))
-    res.status(200).json({
-      status: 'Delete SUccess',
-      code: 200,
-      data: result.data.poster
-    })
-  }).catch(err => res.json({ mas: 'hahah', err: err.message }))
+  foods.findByIdAndRemove(req.params.id)
+    .then(result => {
+      fs.unlink(path.join(result.poster), response => {
+        res.status(200).json({
+          status: 'Delete Success',
+          code: 200,
+          message: `Data with name ${result.name} has been deleted!`,
+          response
+        })
+      })
+    }).catch(err => res.json({ message: 'Delete Failed', err: err.message }))
 }
