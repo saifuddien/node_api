@@ -17,10 +17,10 @@ export const addFoods = (req, res) => {
     res.status(201).json({
       status: 'Success!',
       code: 201,
-      desc: `${req.body.name} has added`,
+      message: `${req.body.name} has added`,
       data: result
     })
-  }).catch(err => res.json(err))
+  }).catch(err => res.json({ message: 'Adding Failed', err: err.message }))
 }
 
 export const getFoods = (req, res) => {
@@ -30,7 +30,7 @@ export const getFoods = (req, res) => {
       code: 200,
       data: result
     })
-  }).catch(err => res.json(err))
+  }).catch(err => res.json({ message: 'Geting Failed', err: err.message }))
 }
 
 export const getOneFoods = (req, res) => {
@@ -40,7 +40,36 @@ export const getOneFoods = (req, res) => {
       code: 200,
       data: result
     })
-  }).catch(err => res.json(err))
+  }).catch(err => res.json({ message: 'Geting Failed', err: err.message }))
+}
+
+export const updateOneFoods = (req, res) => {
+  const name = req.body.name
+  const price = req.body.price
+  const poster = req.file.path
+  const id = req.params.id
+
+  foods.findById(id)
+    .then(result => {
+      result.name = name
+      result.price = price
+
+      if (result.poster !== poster) {
+        fs.unlinkSync(path.join(result.poster))
+        result.poster = poster
+      }
+
+      result.save()
+        .then(results => {
+          res.status(201).json({
+            status: 'Update Success',
+            code: 201,
+            message: `Data with name ${results.name} has been updated!`,
+            data: results
+          })
+        })
+        .catch(err => res.json({ message: 'Update Failed', err: err.message }))
+    })
 }
 
 export const deleteFoods = (req, res) => {
