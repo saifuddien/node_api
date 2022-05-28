@@ -5,6 +5,7 @@ import cors from 'cors'
 import database from './utils/db.js'
 import multer from 'multer'
 import { foodsRouter } from './routers/foods.js'
+import { userRouter } from './routers/user.js'
 
 const app = express()
 const port = process.env.PORT
@@ -36,6 +37,7 @@ app.use('/public', express.static('public'))
 app.use(upload.single('poster'))
 
 app.use('/api/menu', foodsRouter)
+app.use('/api/auth', userRouter)
 
 app.use('/:any', (req, res) => {
   res.status(404).json({
