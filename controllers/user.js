@@ -1,5 +1,7 @@
 import user from '../models/user.js'
 import bcrypt from 'bcrypt'
+import jsonwebtoken from 'jsonwebtoken'
+import 'dotenv/config'
 
 export const userRegister = async (req, res) => {
   const username = req.body.username
@@ -48,13 +50,16 @@ export const userLogin = async (req, res) => {
   const userLog = await user.findOne({ email })
   if (userLog && password) {
     const login = await bcrypt.compare(password, userLog.password)
+    const token = jsonwebtoken.sign({ _id: userLog._id }, process.env.SECRET_KEY)
 
     if (login) {
       return await user.findOne({ email: userLog.email }).then(result => {
-        res.status(200).json({
+
+        res.status(200).header('auth', token).json({
           status: 'Login Success!',
           code: 200,
-          data: result
+          data: result,
+          token
         })
       }).catch(err => res.json({ message: 'Login Failed', error: err.message }))
     } else {
