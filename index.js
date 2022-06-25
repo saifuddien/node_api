@@ -1,6 +1,6 @@
 import 'dotenv/config'
-import * as url from 'url'
-import path from 'path'
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
@@ -33,15 +33,15 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter })
 
-const dirname = url.fileURLToPath(new URL('.', import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 database()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(expressEjsLayouts)
 app.set('view engine', 'ejs')
-app.set('/views', path.join(dirname, '/views'))
-app.use('/public', express.static(path.join(dirname, '/public')))
+app.set('/views', path.join(__dirname, '/views'))
+app.use('/public', express.static(path.join(__dirname, '/public')))
 app.use(upload.single('poster'))
 
 app.use('/api/menu', foodsRouter)
@@ -60,7 +60,7 @@ app.get('/con', (req, res) => {
 })
 
 app.get('/med/:fol/:fil', (req, res) => {
-  res.sendFile(path.join(dirname, '/public/' + req.params.fol + '/' + req.params.fil))
+  res.sendFile(path.join(__dirname, '/public/' + req.params.fol + '/' + req.params.fil))
 })
 
 app.get('/:any', (req, res) => {
