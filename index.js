@@ -1,4 +1,6 @@
 import 'dotenv/config'
+import url from 'url'
+import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
@@ -6,6 +8,7 @@ import database from './utils/db.js'
 import multer from 'multer'
 import { foodsRouter } from './routers/foods.js'
 import { userRouter } from './routers/user.js'
+import expressEjsLayouts from 'express-ejs-layouts'
 
 const app = express()
 const port = process.env.PORT
@@ -30,16 +33,37 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter })
 
+const dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
 database()
 app.use(cors())
 app.use(bodyParser.json())
-app.use('/public', express.static('public'))
+app.use(expressEjsLayouts)
+app.set('view engine', 'ejs')
+app.set('/views', path.join(dirname, '/views'))
+app.use('/public', express.static(path.join(dirname, '/public')))
 app.use(upload.single('poster'))
 
 app.use('/api/menu', foodsRouter)
 app.use('/api/auth', userRouter)
 
-app.use('/:any', (req, res) => {
+app.get('/', (req, res) => {
+  res.render('home', {
+    layout: 'layouts/layout'
+  })
+})
+
+app.get('/con', (req, res) => {
+  res.render('contact', {
+    layout: 'layouts/layout'
+  })
+})
+
+app.get('/med/:fol/:fil', (req, res) => {
+  res.sendFile(path.join(dirname, '/public/' + req.params.fol + '/' + req.params.fil))
+})
+
+app.get('/:any', (req, res) => {
   res.status(404).json({
     code: 404,
     message: req.params.any + ' Not Found'
